@@ -1,0 +1,107 @@
+name: eufi
+prefix: ""
+
+topology:
+  defaults:
+    kind: nokia_srlinux
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:25.7.2
+    nokia_srsim:
+      image: srsim:25.7.R2
+      license: /home/license/srsim_25.lic
+    linux:
+      image: ghcr.io/srl-labs/network-multitool
+#########################################################
+  nodes:
+    dcgw1:
+      kind: nokia_srsim
+      type: sr-1
+      startup-config: ./startup_configs/dcgw1.partial.cfg
+    dcgw2:
+      kind: nokia_srsim
+      type: sr-1
+      startup-config: ./startup_configs/dcgw2.partial.cfg
+    spine1:
+      type: ixr-d3l
+      startup-config: ./startup_configs/spine1.cfg
+    spine2:
+      type: ixr-d3l
+      startup-config: ./startup_configs/spine2.cfg
+    leaf1:
+      type: ixr-d2l
+      startup-config: ./startup_configs/leaf1.cfg
+    leaf2:
+      type: ixr-d2l
+      startup-config: ./startup_configs/leaf2.cfg
+    leaf3:
+      type: ixr-d2l
+      startup-config: ./startup_configs/leaf3.cfg
+    leaf4:
+      type: ixr-d2l
+      startup-config: ./startup_configs/leaf4.cfg
+
+    client1:
+      kind: linux
+      exec:
+        - sudo ip link set eth0 down
+        - sudo ip link set eth1 down
+        - sudo ip link set eth2 down
+        - sudo ip link add bond0 type bond
+        - sudo ip link set eth1 master bond0
+        - sudo ip link set eth2 master bond0
+        - sudo ip link set eth1 up
+        - sudo ip link set eth2 up
+        - sudo ip link set bond0 up
+        - sudo ip addr add 100.99.98.2/24 dev bond0
+        - sudo ip route add default via 100.99.98.1
+
+    client2:
+      kind: linux
+      exec:
+        - sudo ip link set eth0 down
+        - sudo ip link set eth1 down
+        - sudo ip link set eth2 down
+        - sudo ip link add bond0 type bond
+        - sudo ip link set eth1 master bond0
+        - sudo ip link set eth2 master bond0
+        - sudo ip link set eth1 up
+        - sudo ip link set eth2 up
+        - sudo ip link set bond0 up
+        - sudo ip addr add 100.99.98.3/24 dev bond0
+        - sudo ip route add default via 100.99.98.1
+
+##### Rogue Client is claiming the same IP and MAC address as GW ### 
+    rogueclient:
+      kind: linux
+      exec:
+        - sudo ip link set eth0 down
+        - sudo ip link set eth1 down
+        - sudo ip link set dev eth1 address 00:11:22:33:44:55
+        - sudo ip link set eth1 up
+        - sudo ip addr add 100.99.98.1/24 dev eth1
+        - sudo ip route add default via 100.99.98.1
+#########################################################
+
+  links:
+  # DCGW - Spine
+    - endpoints: ["dcgw1:1/1/c1/1", "spine1:e1-31"]
+    - endpoints: ["dcgw1:1/1/c2/1", "spine2:e1-31"]
+    - endpoints: ["dcgw2:1/1/c1/1", "spine1:e1-32"]
+    - endpoints: ["dcgw2:1/1/c2/1", "spine2:e1-32"]
+  # Leaf-Spine
+    - endpoints: ["leaf1:e1-1", "spine1:e1-1"]
+    - endpoints: ["leaf1:e1-2", "spine2:e1-1"]
+    - endpoints: ["leaf2:e1-1", "spine1:e1-2"]
+    - endpoints: ["leaf2:e1-2", "spine2:e1-2"]
+    - endpoints: ["leaf3:e1-1", "spine1:e1-3"]
+    - endpoints: ["leaf3:e1-2", "spine2:e1-3"]
+    - endpoints: ["leaf4:e1-1", "spine1:e1-4"]
+    - endpoints: ["leaf4:e1-2", "spine2:e1-4"]
+
+  # Client Links
+    - endpoints: ["leaf1:e1-5", "client1:eth1"]
+    - endpoints: ["leaf2:e1-5", "client1:eth2"]
+    - endpoints: ["leaf3:e1-5", "client2:eth1"]
+    - endpoints: ["leaf4:e1-5", "client2:eth2"]
+    - endpoints: ["leaf1:e1-6", "rogueclient:eth1"]
