@@ -2,18 +2,54 @@
 
 ![Network Diagram](diagram.png)
 
-This lab demonstrates **EVPN-VXLAN interworking** between **SR Linux–based 7720 IXR** nodes (leaf and spine) and an **SROS-based 7750 SR-1** acting as the **Data Center Gateway (DCGW)**.
+This lab demonstrates **EVPN-VXLAN interworking** between **SR Linux–based 7720 IXR** leaf/spine switches and an **SROS-based 7750 SR-1** functioning as the **Data Center Gateway (DCGW)**.
 
-A **Layer 2 EVPN (MAC-VRF)** spans across the leaf switches up to the DCGWs. The **spines** are not service-aware—they simply route VXLAN tunnels.
+A **Layer 2 EVPN (MAC-VRF)** extends from the leaf switches to the DCGWs. **Spines** act purely as IP routers, forwarding VXLAN tunnels without participating in EVPN signaling.
 
-On the DCGWs, a **Layer 3 VRF (VPRN)** includes an **IRB interface** attached to the L2 EVPN (MAC-VRF on SR Linux / VPLS on SROS).
+Each DCGW hosts a **Layer 3 VRF (VPRN)** with an **IRB interface** connected to the L2 EVPN instance (MAC-VRF on SR Linux / VPLS on SROS).
 
-Both DCGWs share the same **gateway IP** using **passive VRRP** (VRRP without signaling).
+Both DCGWs share a common **gateway IP** using **passive VRRP** (VRRP without signaling).
 
-- **Anycast GW IP:** `100.99.98.1`  
-- **Client 1 IP:** `100.99.98.2`  
-- **Client 2 IP:** `100.99.98.3`  
-- **Rogue Client:** Spoofs the GW IP and MAC
+- **Anycast Gateway IP:** `100.99.98.1`  
+- **Client 1:** `100.99.98.2`  
+- **Client 2:** `100.99.98.3`  
+- **Rogue Client:** Spoofs the gateway’s IP and MAC
 
-Because **proxy-ARP** is enabled and the **GW MAC/IP** is advertised as **EVPN-static**, spoofing attempts fail. The network consistently prefers the legitimate GW entry, ignoring rogue traffic. The rogue client’s MAC is not learned, and its IP is excluded from the EVPN domain due to overlap with the GW.  
-This mechanism secures the EVPN domain against both **spoofing** and **misconfiguration**.
+Because **proxy-ARP** is active and the **gateway MAC/IP** is advertised as **EVPN-static**, spoofing attempts fail. The network always prefers the legitimate gateway entry and ignores rogue traffic. The rogue MAC is never learned, and its IP is excluded from EVPN due to overlap with the gateway.  
+This protects the EVPN fabric from **spoofing** and **misconfiguration**.
+
+---
+
+## Deployment Guide
+
+### System Requirements
+- Linux host with **16 GB RAM** and **8 vCPUs** (minimum)
+- Installed: **Docker**, **Containerlab**, **Git**
+
+### Install Dependencies
+```bash
+# Install or upgrade Containerlab
+curl -sL https://containerlab.dev/setup | sudo -E bash -s "all"
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+
+# Install Git
+sudo apt install git -y  # or follow https://git-scm.com/install/linux
+
+# Lab Deployment Steps
+
+# 1. Fetch the lab repository
+git -C eufi pull || git clone https://github.com/kkayhan/eufi.git
+
+# 2. Enter the lab directory and deploy
+cd eufi
+sudo clab deploy
+
+# 3. Access the nodes
+# When deployment completes, containerlab lists management IPs.
+# SSH using node names (e.g. ssh leaf1) or the printed IPs.
+
+# Cleanup
+cd eufi
+sudo clab destroy --cleanup
