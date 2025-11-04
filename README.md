@@ -25,7 +25,8 @@ This protects the EVPN fabric from **spoofing** and **misconfiguration**.
 ### System Requirements
 - Linux host with **16 GB RAM** and **8 vCPUs** (minimum)
 - Installed: **Docker**, **Containerlab**, **Git**
-
+- A valid SR_SIM (Containerised SROS) license to be located under eufi/srsim_25.lic. 
+Alternatively eufi.clab.yaml can be edited to point to the license file location  -->   license: ./srsim_25.lic
 ### Install Dependencies
 
 #### Install or upgrade Containerlab
