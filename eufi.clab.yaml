@@ -9,7 +9,7 @@ topology:
       image: ghcr.io/nokia/srlinux:25.7.2
     nokia_srsim:
       image: srsim:25.7.R2
-      license: /home/license/srsim_25.lic
+      license: ./srsim_25.lic
     linux:
       image: ghcr.io/srl-labs/network-multitool
 #########################################################
