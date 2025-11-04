@@ -27,22 +27,27 @@ This protects the EVPN fabric from **spoofing** and **misconfiguration**.
 - Installed: **Docker**, **Containerlab**, **Git**
 
 ### Install Dependencies
-```bash
+
 # Install or upgrade Containerlab
+```bash
 curl -sL https://containerlab.dev/setup | sudo -E bash -s "all"
 
 # Install Docker
+```bash
 curl -fsSL https://get.docker.com | sh
 
 # Install Git
+```bash
 sudo apt install git -y  # or follow https://git-scm.com/install/linux
 
 # Lab Deployment Steps
 
 # 1. Fetch the lab repository
+```bash
 git -C eufi pull || git clone https://github.com/kkayhan/eufi.git
 
 # 2. Enter the lab directory and deploy
+```bash
 cd eufi
 sudo clab deploy
 
@@ -51,5 +56,6 @@ sudo clab deploy
 # SSH using node names (e.g. ssh leaf1) or the printed IPs.
 
 # Cleanup
+```bash
 cd eufi
 sudo clab destroy --cleanup
