@@ -45,7 +45,7 @@ sudo apt install git -y  # or follow https://git-scm.com/install/linux
 
 #### 1. Fetch the lab repository
 ```bash
-git -C eufi pull || git clone https://github.com/kkayhan/eufi.git
+git clone https://github.com/kkayhan/eufi.git
 ```
 #### 2. Enter the lab directory and deploy
 ```bash
